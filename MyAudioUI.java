@@ -34,6 +34,46 @@ public class MyAudioUI
 			else if (action.equalsIgnoreCase("Q") || action.equalsIgnoreCase("QUIT"))
 				return;
 			
+			else if (action.equalsIgnoreCase("SEARCH"))
+			{
+				String title = ""; 
+
+				System.out.print("Title: ");
+				if (scanner.hasNext())
+				{
+					title = scanner.next();
+					scanner.nextLine(); // "consume" nl character (necessary when mixing nextLine() and nextInt())
+				}
+				// IF TITLE IS FOUND IN STORE, PRINT ITS INDEX AND AND THE INFO OF THIS Content
+				store.search(title); 
+			}
+
+			else if (action.equalsIgnoreCase("SEARCHA"))
+			{
+				String artist = ""; 
+
+				System.out.print("Artist: ");
+				if (scanner.hasNextLine())
+				{
+					artist = scanner.nextLine();
+				}
+				// IF TITLE IS FOUND IN STORE, PRINT ITS INDEX AND AND THE INFO OF THIS Content
+				store.searchArtist(artist); 
+			}
+
+			else if (action.equalsIgnoreCase("SEARCHG"))
+			{ 
+				String genre = ""; 
+
+				System.out.print("Genre [POP, ROCK, JAZZ, HIPHOP, RAP, CLASSICAL]: ");
+				if (scanner.hasNext())
+				{
+					genre = scanner.next();
+					scanner.nextLine();
+				}
+				// IF TITLE IS FOUND IN STORE, PRINT ITS INDEX AND AND THE INFO OF THIS Content
+			}
+			
 			else if (action.equalsIgnoreCase("STORE"))	// List all songs
 			{
 				store.listAll(); 
@@ -62,19 +102,31 @@ public class MyAudioUI
 			// Specify the index of the content
 			else if (action.equalsIgnoreCase("DOWNLOAD")) 
 			{
-				int index = 0;
-				
-				System.out.print("Store Content #: ");
+				int fromIndex = 0;
+				int toIndex = 0;
+				System.out.print("From Store Content #: ");
 				if (scanner.hasNextInt())
 				{
-					index = scanner.nextInt();
+					fromIndex = scanner.nextInt();
 					scanner.nextLine(); // "consume" nl character (necessary when mixing nextLine() and nextInt())
 				}
-				AudioContent content = store.getContent(index);
-				if (content == null)
+				System.out.print("To Store Content #: ");
+				if (scanner.hasNextInt())
+				{
+					toIndex = scanner.nextInt();
+					scanner.nextLine(); // "consume" nl character (necessary when mixing nextLine() and nextInt())
+				}
+
+
+				// Implement the downloading of a range of things: 
+				for (int i = fromIndex; i <= toIndex; i++) 
+				{
+					AudioContent content = store.getContent(i);
+					if (content == null)
 					System.out.println("Content Not Found in Store");
-				else if (!mylibrary.download(content))
-						System.out.println(mylibrary.getErrorMessage());						
+					else if (!mylibrary.download(content))
+							System.out.println(mylibrary.getErrorMessage());
+				}						
 			}
 
 			// Get the *library* index (index of a song based on the songs list)

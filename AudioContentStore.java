@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 // Simulation of audio content in an online store
 // The songs, podcasts, audiobooks listed here can be "downloaded" to your library
@@ -8,15 +9,21 @@ import java.util.ArrayList;
 public class AudioContentStore
 {
 		private ArrayList<AudioContent> contents; 
+		private HashMap<String, Integer> contentIndexes; 
+		private HashMap<String, ArrayList<Integer>> artistIndexes; 
+		private HashMap<Song.Genre, ArrayList<Integer>> genreIndexes; 
 		
 		public AudioContentStore()
 		{
+			contentIndexes = new HashMap<>(); 
 			contents = new ArrayList<AudioContent>();
+			artistIndexes = new HashMap<>(); 
+			genreIndexes = new HashMap<>();
 			
 		  // Create some songs audiobooks and podcasts and to store
 			String file = "Yesterday, all my troubles";
 			contents.add(new Song("Yesterday", 1965, "123", Song.TYPENAME, file, 2, "The Beatles", "Paul McCartney", Song.Genre.POP, file));
-			
+
 			file = "I'm sorry if I seem uninterested\r\n"
 					+ "Or I'm not listenin' or I'm indifferent\r\n"
 					+ "Truly, I ain't got no business here\r\n"
@@ -34,25 +41,25 @@ public class AudioContentStore
 					+ "Everyday man's on the block\r\n"
 					+ "Smoke trees (Ah)";
 			contents.add(new Song("Man's Not Hot", 2017, "374", Song.TYPENAME, file, 2, "Michael Dapaah", "Michael Dapaah", Song.Genre.RAP, file));
-			
+
 			file = "The world was on fire and no one could save me but you\r\n"
 					+ "It's strange what desire will make foolish people do\r\n"
 					+ "I never dreamed that I'd meet somebody like you\r\n"
 					+ "And I never dreamed that I'd lose somebody like you";
 			contents.add(new Song("Wicked Game", 1989, "185", Song.TYPENAME, file, 4, "Chris Isaak", "Chris Isaak", Song.Genre.ROCK, file));
-			
+
 			file = "The lights go out and I can't be saved\r\n"
 					+ "Tides that I tried to swim against\r\n"
 					+ "Have brought me down upon my knees\r\n"
 					+ "Oh, I beg, I beg and plead\r\n"
 					+ "Singin' come out of things un said";
 			contents.add(new Song("Clocks", 2002, "875", Song.TYPENAME, file, 5, "Coldplay", "Guy Berryman, Chris Martin", Song.Genre.ROCK, file));
-			
+
 			file = "I'm waking up to ash and dust\r\n"
 					+ "I wipe my brow and I sweat my rust\r\n"
 					+ "I'm breathing in the chemicals";
 			contents.add(new Song("Radioactive", 2012, "823", Song.TYPENAME, file, 3, "Imagine Dragons", "Josh Mosser, A. Grant, Dan Reynolds, Wayne Sermon, Ben McKee", Song.Genre.ROCK, file));
-			
+
 			file = "Birds flying high\r\n"
 					+ "You know how I feel\r\n"
 					+ "Sun in the sky\r\n"
@@ -65,33 +72,167 @@ public class AudioContentStore
 					+ "For me";
 			contents.add(new Song("Feelin' Good", 1965, "875", Song.TYPENAME, file, 3, "Nina Simone", 
 					"Anthony Newley, Leslie Bricusse",Song.Genre.JAZZ, file));
-			
+
 			file = "Find table spaces, say your social graces\n"
 					+ "Bow your head, they're pious here\n"
 					+ "But you and I, we're pioneers, we make our own rules\n"
 					+ "Our own room, no bias here";
 			contents.add(new Song("Wild Things", 2015, "443", Song.TYPENAME, file, 4, "Alessia Cara", "Alessia Cara", Song.Genre.POP, file));
-			
+
 			AudioBook book = new AudioBook("Harry Potter and the Goblet of Fire", 2015, "894", AudioBook.TYPENAME,  "", 1236,
 					"J.K. Rowling", "Jim Dale", makeHPChapterTitles(), makeHPChapters());
 			contents.add(book);
-			
+
 			book = new AudioBook("Moby Dick", 2018, "376", AudioBook.TYPENAME,  "", 1422,
 					"Herman Melville", "Pete Cross", makeMDChapterTitles(), makeMDChapters());
 			contents.add(book);
-			
+
 			book = new AudioBook("Shogun", 2018, "284", AudioBook.TYPENAME,  "", 3213,
 					"James Clavel", "Ralph Lister", makeSHChapterTitles(), makeSHChapters());
 			contents.add(book);
-			
+
+
 			// Create a podcast object if you are doing the bonus see the makeSeasons() method below
 			// It is currently commented out. It makes use of a class Season you may want to also create
 			// or change it to something else
 			Podcast podcast = new Podcast("The Secret Life of Canala", 2021, "865", Podcast.TYPENAME, "", 0, "Leah-Simone Bowen, Falen Johnson", makeSeasons()); 
 			contents.add(podcast); 
+
+			// Fill in the HashMap for Title -- > Indexes 
+			for (int i = 0;  i < contents.size(); i++)
+			{
+				contentIndexes.put(contents.get(i).getTitle(), i);  
+			}
+
+			makeArtistHashMap(); 
+			makeGenreHashMap(); 
+			
+
 		}
+
+		public void makeArtistHashMap() // Helper method that makes the HashMap for Artist -- > Indexes
+		{
+			// Fill in the HashMap for Artist -- > Index ArrayList 
+			for (int i = 0; i < contents.size(); i++)
+			{	
+				AudioContent content = contents.get(i);
+				
+				// If it is a song or an audiobook
+				if (content.getType().equals(Song.TYPENAME) || content.getType().equals(AudioBook.TYPENAME))
+				{
+					// Down cast to gain access to the appropriate getter method
+					if (content.getType().equals(Song.TYPENAME)) 
+					{
+						Song song = (Song) contents.get(i);
+						// If this artist is not already in the HashMap, PUT it there
+						if (!artistIndexes.containsKey(song.getArtist())) 
+						{
+							artistIndexes.put(song.getArtist(), new ArrayList<Integer>());  
+						}
+						// Add to that ArrayList belonging to the Author/Artist the index
+						artistIndexes.get(song.getArtist()).add(i); 
+					}
+
+					// Down cast to gain access to the appropriate getter method
+					else if (content.getType().equals(AudioBook.TYPENAME)) 
+					{
+						AudioBook audiobook = (AudioBook) contents.get(i);
+
+						// If this author is not already in the HashMap, PUT it there 
+						if (!artistIndexes.containsKey(audiobook.getAuthor())) 
+						{	
+							artistIndexes.put(audiobook.getAuthor(), new ArrayList<Integer>());  
+						}
+						// Add to that ArrayList belonging to the Author/Artist the index			
+						artistIndexes.get(audiobook.getAuthor()).add(i); 
+					}
+				}
+			}
+		}
+
+		public void makeGenreHashMap() 
+		{
+			// Fill in the HashMap for Genre -- > Index ArrayList 
+			for (int i = 0; i < contents.size(); i++)
+			{	
+				AudioContent content = contents.get(i);
+				// If it is a song 
+				if (content.getType().equals(Song.TYPENAME))
+				{
+					Song song = (Song) contents.get(i);
+					// If this genre is not already in the HashMap, PUT it there
+					if (!genreIndexes.containsKey(song.getGenre()))
+					{
+						genreIndexes.put(song.getGenre(), new ArrayList<Integer>());  
+					}
+					// Add to that ArrayList belonging to the Author/Artist the index
+					genreIndexes.get(song.getGenre()).add(i); 
+					
+				}
+			}
+			System.out.println(genreIndexes.get(Song.Genre.JAZZ));
+		}
+
 		
-		
+		public void search(String title) 
+		{	
+			// Gets the index from the HashMap and then prints the Info of that AudioContent object 
+			try 
+			{
+				int index = contentIndexes.get(title); 
+				contents.get(index).printInfo();
+			}
+			catch (Exception e)
+			{
+				// Error message
+				System.out.println("No matches for " + title); 
+			}
+
+		}
+
+		public void searchArtist(String artist) 
+		{	
+			// Given an artist, prints all songs of that artist
+			try 
+			{
+				// Iterate through the ArrayList of indexes belong to that artist
+				for (int i = 0; i < artistIndexes.get(artist).size(); i++)
+				{	
+					int index = artistIndexes.get(artist).get(i);
+					// then print each song's info 
+					System.out.print(index + 1 + ". "); 
+					contents.get(index).printInfo(); 
+					System.out.println(); 
+				}
+			}
+			catch (Exception e)
+			{
+				// Error message
+				System.out.println("No matches for " + artist); 
+			}
+		}
+
+		public void searchGenre(Song.Genre genre) 
+		{	
+			// Given an artist, prints all songs of that artist
+			try 
+			{
+				// Iterate through the ArrayList of indexes belong to that genre
+				for (int i = 0; i < genreIndexes.get(genre).size(); i++)
+				{	
+					int index = genreIndexes.get(genre).get(i);
+					// then print each song's info 
+					System.out.print(index + 1 + ". "); 
+					contents.get(index).printInfo(); 
+					System.out.println(); 
+				}
+			}
+			catch (Exception e)
+			{
+				// Error message
+				System.out.println("No matches for " + genre); 
+			}
+		}
 		public AudioContent getContent(int index)
 		{
 			if (index < 1 || index > contents.size())
