@@ -66,9 +66,10 @@ public class Library
 			podcasts.add(addedPodcast); 
 			return true; 
 		}
-		errorMsg = content.getType() + " already downloaded"; 
+		errorMsg = content.getType() + " " + content.getTitle() + " already downloaded"; 
 		return false; 
 	}
+
 	
 	// Print Information (printInfo()) about all songs in the array list
 	public void listAllSongs()

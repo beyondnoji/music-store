@@ -233,6 +233,12 @@ public class AudioContentStore
 				System.out.println("No matches for " + genre); 
 			}
 		}
+
+		public ArrayList<Integer> getArtistIndexes(String artist)
+		{
+			return artistIndexes.get(artist);
+		}
+
 		public AudioContent getContent(int index)
 		{
 			if (index < 1 || index > contents.size())

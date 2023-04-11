@@ -71,7 +71,31 @@ public class MyAudioUI
 					genre = scanner.next();
 					scanner.nextLine();
 				}
-				// IF TITLE IS FOUND IN STORE, PRINT ITS INDEX AND AND THE INFO OF THIS Content
+
+				if (genre.equalsIgnoreCase("POP")) 
+				{
+					store.searchGenre(Song.Genre.POP); 
+				}
+				else if (genre.equalsIgnoreCase("ROCK"))
+				{
+					store.searchGenre(Song.Genre.ROCK);
+				}
+				else if (genre.equalsIgnoreCase("JAZZ"))
+				{
+					store.searchGenre(Song.Genre.JAZZ);
+				}
+				else if(genre.equalsIgnoreCase("HIPHOP"))
+				{
+					store.searchGenre(Song.Genre.HIPHOP);
+				}
+				else if(genre.equalsIgnoreCase("RAP")) 
+				{
+					store.searchGenre(Song.Genre.RAP);
+				}
+				else if (genre.equalsIgnoreCase("CLASSICAL"))
+				{
+					store.searchGenre(Song.Genre.CLASSICAL);
+				}
 			}
 			
 			else if (action.equalsIgnoreCase("STORE"))	// List all songs
@@ -123,10 +147,66 @@ public class MyAudioUI
 				{
 					AudioContent content = store.getContent(i);
 					if (content == null)
-					System.out.println("Content Not Found in Store");
+					System.out.println("Content Not Found in Store"); 
 					else if (!mylibrary.download(content))
 							System.out.println(mylibrary.getErrorMessage());
 				}						
+			}
+
+			else if (action.equalsIgnoreCase("DOWNLOADA")) 
+			{
+				String artist = ""; 
+				System.out.print("Artist Name: ");
+				if (scanner.hasNextLine())
+				{
+					artist = scanner.nextLine();
+				}
+
+				// Iterate through the ArrayList of Indexes belonging to that Artist 	
+				ArrayList<Integer> indexes = store.getArtistIndexes(artist); 
+				for (int i = 0; i < indexes.size(); i++)
+				{
+					int index = indexes.get(i) + 1; // add one because the method "Download" does a -1 on the index elsewhere in the program 
+					AudioContent content = store.getContent(index); 
+					mylibrary.download(content); 
+				}			
+			}
+
+			
+			else if (action.equalsIgnoreCase("DOWNLOADG")) 
+			{
+				String genre = ""; 
+				System.out.print("Genre [POP, ROCK, JAZZ, HIPHOP, RAP, CLASSICAL]: ");
+				if (scanner.hasNext())
+				{
+					genre = scanner.next();
+					scanner.nextLine();
+				}
+
+				if (genre.equalsIgnoreCase("POP")) 
+				{
+					store.searchGenre(Song.Genre.POP); 
+				}
+				else if (genre.equalsIgnoreCase("ROCK"))
+				{
+					store.searchGenre(Song.Genre.ROCK);
+				}
+				else if (genre.equalsIgnoreCase("JAZZ"))
+				{
+					store.searchGenre(Song.Genre.JAZZ);
+				}
+				else if(genre.equalsIgnoreCase("HIPHOP"))
+				{
+					store.searchGenre(Song.Genre.HIPHOP);
+				}
+				else if(genre.equalsIgnoreCase("RAP")) 
+				{
+					store.searchGenre(Song.Genre.RAP);
+				}
+				else if (genre.equalsIgnoreCase("CLASSICAL"))
+				{
+					store.searchGenre(Song.Genre.CLASSICAL);
+				}			
 			}
 
 			// Get the *library* index (index of a song based on the songs list)
