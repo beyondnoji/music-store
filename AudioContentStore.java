@@ -194,7 +194,6 @@ public class AudioContentStore
 					
 				}
 			}
-			System.out.println(genreIndexes.get(Song.Genre.JAZZ));
 		}
 
 		
