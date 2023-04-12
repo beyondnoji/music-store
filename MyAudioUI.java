@@ -156,7 +156,6 @@ public class MyAudioUI
 						{
 							System.out.println(e.getMessage());
 						}
-
 					}
 									
 				}
@@ -512,6 +511,22 @@ public class MyAudioUI
 				System.out.println(e.getMessage()); 
 				System.out.print("\n>");
 			}
+			catch (DownloadedAlready e) 
+			{
+				System.out.println(e.getMessage()); 
+				System.out.print("\n>");
+			}
+			catch (PlaylistNotFound e) 
+			{
+				System.out.println(e.getMessage()); 
+				System.out.print("\n>");
+			}
+			catch (PlaylistAlreadyExists e) 
+			{
+				System.out.println(e.getMessage()); 
+				System.out.print("\n>");
+			}
+			
 		}
 	}
 }

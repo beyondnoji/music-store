@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,11 +74,15 @@ public class Library
 	
 	public void downloadArtist(String artist, AudioContentStore store)
 	{
+		// This try block is for the declaration of the ArrayList of indexes using the Artist string 
+		// i.e., this try block sees if the artist that is inputted is a valid input
 		try 
 		{
 			ArrayList<Integer> indexes = store.getArtistIndexes(artist); 
 			for (int i = 0; i < indexes.size(); i++)
 			{
+				// This try-catch is inside the for loop in order that the "Already Downloaded Message" be printed for each item,
+				// as opposed to only the firsts
 				try 
 				{
 					int index = indexes.get(i) + 1; // add one because the method "Download" does a -1 on the index elsewhere in the program 
@@ -90,7 +95,8 @@ public class Library
 				}
 			}	
 		}
-		catch (Exception e)
+		// Catch exception where artist input is invalid 
+		catch (NullPointerException e)
 		{
 			System.out.println("No Matches for " + artist);
 		}
@@ -195,7 +201,7 @@ public class Library
 	{
 		if (index < 1 || index > songs.size())
 		{
-			throw new AudioContentNotFound("Song Not Found");
+			throw new PlaylistNotFound("Song Not Found");
 		}  
 
 		String songTitle = songs.get(index - 1).getTitle(); 
@@ -415,7 +421,7 @@ public class Library
 			playlists.add(newPlaylist);
 		}
 		errorMsg = "Playlist " + title + " Already Exists"; 
-		throw new AudioContentNotFound(errorMsg);
+		throw new PlaylistAlreadyExists(errorMsg);
 	}
 	
 	// Print list of content information (songs, audiobooks etc) in playlist named title from list of playlists
@@ -431,7 +437,7 @@ public class Library
 			}
 		}
 
-		throw new AudioContentNotFound("No such playlist");
+		throw new PlaylistNotFound("No such playlist");
 	}
 	
 	// Play all content in a playlist
@@ -445,7 +451,7 @@ public class Library
 				return;
 			}
 		}
-		throw new AudioContentNotFound("No such playlist");
+		throw new PlaylistNotFound("No such playlist");
 	}
 	
 	// Play a specific song/audiobook in a playlist
@@ -459,7 +465,7 @@ public class Library
 				return; 
 			}
 		}
-		throw new AudioContentNotFound("No such playlist");
+		throw new PlaylistNotFound("No such playlist");
 	}
 	
 
@@ -505,7 +511,7 @@ public class Library
 			return;
 		}
 		
-		throw new AudioContentNotFound("Could Not Find That Playlist");
+		throw new PlaylistNotFound("Could Not Find That Playlist");
 	}
 
   // Delete a song/audiobook/podcast from a playlist with the given title
@@ -515,7 +521,7 @@ public class Library
 		if (! this.getPlaylist(title).contains(index)) 
 		{
 			errorMsg = "Index in playlist is not valid"; 
-			throw new AudioContentNotFound(errorMsg);
+			throw new PlaylistNotFound(errorMsg);
 		}
 		this.getPlaylist(title).deleteContent(index); 
 	}
@@ -537,5 +543,23 @@ class DownloadedAlready extends RuntimeException
 	public DownloadedAlready(String message)
 	{
 		super(message); 
+	}
+}
+
+class PlaylistNotFound extends RuntimeException
+{
+	public PlaylistNotFound() {}
+	public PlaylistNotFound(String message)
+	{
+		super(message); 
+	}
+}
+
+class PlaylistAlreadyExists extends RuntimeException
+{
+	public PlaylistAlreadyExists() {}
+	public PlaylistAlreadyExists(String message)
+	{
+		super(message);
 	}
 }
