@@ -1,5 +1,9 @@
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 // Simulation of audio content in an online store
 // The songs, podcasts, audiobooks listed here can be "downloaded" to your library
@@ -19,7 +23,20 @@ public class AudioContentStore
 			contents = new ArrayList<AudioContent>();
 			artistIndexes = new HashMap<>(); 
 			genreIndexes = new HashMap<>();
-			
+			try 
+			{
+				ArrayList<AudioContent> storedContent = readStore(); 
+				for (int i = 0; i < storedContent.size(); i++)
+				{
+					contents.add(storedContent.get(i));
+				}
+			}
+			catch (IOException e)
+			{
+				System.out.println(e.getMessage()); 
+			}	
+
+			/* 
 		  // Create some songs audiobooks and podcasts and to store
 			String file = "Yesterday, all my troubles";
 			contents.add(new Song("Yesterday", 1965, "123", Song.TYPENAME, file, 2, "The Beatles", "Paul McCartney", Song.Genre.POP, file));
@@ -78,12 +95,17 @@ public class AudioContentStore
 					+ "But you and I, we're pioneers, we make our own rules\n"
 					+ "Our own room, no bias here";
 			contents.add(new Song("Wild Things", 2015, "443", Song.TYPENAME, file, 4, "Alessia Cara", "Alessia Cara", Song.Genre.POP, file));
+			*/
 
+			/*
+			 
+	
 			AudioBook book = new AudioBook("Harry Potter and the Goblet of Fire", 2015, "894", AudioBook.TYPENAME,  "", 1236,
 					"J.K. Rowling", "Jim Dale", makeHPChapterTitles(), makeHPChapters());
 			contents.add(book);
+			*/
 
-			book = new AudioBook("Moby Dick", 2018, "376", AudioBook.TYPENAME,  "", 1422,
+			AudioBook book = new AudioBook("Moby Dick", 2018, "376", AudioBook.TYPENAME,  "", 1422,
 					"Herman Melville", "Pete Cross", makeMDChapterTitles(), makeMDChapters());
 			contents.add(book);
 
@@ -95,8 +117,10 @@ public class AudioContentStore
 			// Create a podcast object if you are doing the bonus see the makeSeasons() method below
 			// It is currently commented out. It makes use of a class Season you may want to also create
 			// or change it to something else
+			/* 
 			Podcast podcast = new Podcast("The Secret Life of Canala", 2021, "865", Podcast.TYPENAME, "", 0, "Leah-Simone Bowen, Falen Johnson", makeSeasons()); 
 			contents.add(podcast); 
+ 			*/
 
 			// Fill in the HashMap for Title -- > Indexes 
 			for (int i = 0;  i < contents.size(); i++)
@@ -180,6 +204,7 @@ public class AudioContentStore
 			try 
 			{
 				int index = contentIndexes.get(title); 
+				System.out.print(index + 1 + ". "); 
 				contents.get(index).printInfo();
 			}
 			catch (Exception e)
@@ -237,6 +262,11 @@ public class AudioContentStore
 		public ArrayList<Integer> getArtistIndexes(String artist)
 		{
 			return artistIndexes.get(artist);
+		}
+
+		public ArrayList<Integer> getGenreIndexes(Song.Genre genre)
+		{
+			return genreIndexes.get(genre);
 		}
 
 		public AudioContent getContent(int index)
@@ -374,5 +404,103 @@ public class AudioContentStore
 		 
 		  seasons.add(s2);
 		  return seasons;
+		}
+
+		private ArrayList<AudioContent> readStore() throws IOException
+		{
+			File file = new File("store.txt"); 
+			Scanner sc = new Scanner(file); 
+			ArrayList<AudioContent> contentObjects = new ArrayList<>(); 
+			String thisLine = ""; 
+
+			while (sc.hasNextLine()) 
+			{
+
+				thisLine = sc.nextLine();
+				String type = ""; 
+
+				if (thisLine.equals("SONG")) 
+				{
+					type = "SONG";
+					String id = sc.nextLine(); 
+					String title = sc.nextLine();
+					String year = sc.nextLine(); 
+					int length = Integer.parseInt(sc.nextLine());
+					String artist = sc.nextLine();
+					String composer = sc.nextLine(); 
+					String genre = sc.nextLine(); 
+					String lyrics = ""; 
+					int numOfLyricLines = Integer.parseInt(sc.nextLine()); 
+					for (int i = 0; i < numOfLyricLines; i++)
+					{
+						lyrics += sc.nextLine() + " "; 
+					}
+					contentObjects.add(new Song(title, Integer.parseInt(year), id, type, "", length, artist, composer, isGenre(genre), lyrics)); 
+					continue; 
+				}
+				
+				else if (thisLine.equals("AUDIOBOOK"))
+				{
+					ArrayList<String> chapterTitles = new ArrayList<>(); 
+					ArrayList<String> chapters = new ArrayList<>(); 
+					type = "AUDIOBOOK";
+					String id = sc.nextLine(); 
+					String title = sc.nextLine();
+					String year = sc.nextLine(); 
+					int length = Integer.parseInt(sc.nextLine());
+					String author = sc.nextLine();
+					String narrator = sc.nextLine(); 
+
+					int numOfChapters = Integer.parseInt(sc.nextLine()); 
+					for (int i = 0; i < numOfChapters; i++)
+					{
+						chapterTitles.add(sc.nextLine()); 
+					}
+
+					for (int i = 0; i < numOfChapters; i++)
+					{
+						int numOfChapterLines = Integer.parseInt(sc.nextLine()); 
+						for (int j = 0; j < numOfChapterLines && sc.hasNextLine(); i++)
+						{
+							chapters.add(sc.nextLine()); 
+						}
+					}
+
+					contentObjects.add(new AudioBook(title, numOfChapters, id, type, year, length, author, narrator, chapterTitles, chapters)); 
+				}
+			}
+			return contentObjects; 
+		}
+
+		public Song.Genre isGenre(String genre) 
+		{
+			if (genre.equalsIgnoreCase("POP")) 
+			{
+				return Song.Genre.POP; 
+			}
+			else if (genre.equalsIgnoreCase("ROCK"))
+			{
+				return Song.Genre.ROCK; 
+			}
+			else if (genre.equalsIgnoreCase("JAZZ"))
+			{
+				return Song.Genre.JAZZ;
+			}
+			else if(genre.equalsIgnoreCase("HIPHOP"))
+			{
+				return Song.Genre.HIPHOP;
+			}
+			else if(genre.equalsIgnoreCase("RAP")) 
+			{
+				return Song.Genre.RAP; 
+			}
+			else if (genre.equalsIgnoreCase("CLASSICAL"))
+			{
+				return Song.Genre.CLASSICAL; 
+			}
+			else 
+			{
+				return null;
+			}
 		}
 }

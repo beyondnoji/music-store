@@ -43,34 +43,78 @@ public class Library
 	 * If it is already in a list, set the errorMsg string and return false. Otherwise add it to the list and return true
 	 * See the video
 	 */
-	public boolean download(AudioContent content)
-	{
-		// if the content is a song 
+	public void download(AudioContent content)
+	{ 
+		if (content == null) throw new AudioContentNotFound("Content Not Found"); 
+		// if the content is a song
 		if (content.getType().equals(Song.TYPENAME) &&  !songs.contains(content)) 
 		{	
 			Song addedSong = (Song) content; // Down casting the AudioContent object to an instance of Song
-			songs.add(addedSong);  
-			return true;  
+			songs.add(addedSong);    
 		}
 
 		// if the content is an audiobook 
 		else if (content.getType().equals(AudioBook.TYPENAME) &&  ! audiobooks.contains(content))
 		{
 			AudioBook addedAudioBook = (AudioBook) content; // Down casting the AudioContent object to an instance of AudioBook
-			audiobooks.add(addedAudioBook); 
-			return true; 
+			audiobooks.add(addedAudioBook);
 		}
+
+		// if the content is a podcast and it is not contained already
 		else if (content.getType().equals(Podcast.TYPENAME) &&  !podcasts.contains(content) )
 		{
 			Podcast addedPodcast = (Podcast) content; 
-			podcasts.add(addedPodcast); 
-			return true; 
+			podcasts.add(addedPodcast);  
 		}
-		errorMsg = content.getType() + " " + content.getTitle() + " already downloaded"; 
-		return false; 
+		// if already downloaded throw exception 
+		else throw new DownloadedAlready(content.getType() + " " + content.getTitle() + " Already Downloaded");
+		System.out.println(content.getType() + " " + content.getTitle() + " Added to Library"); 
+	}
+	
+	public void downloadArtist(String artist, AudioContentStore store)
+	{
+		try 
+		{
+			ArrayList<Integer> indexes = store.getArtistIndexes(artist); 
+			for (int i = 0; i < indexes.size(); i++)
+			{
+				try 
+				{
+					int index = indexes.get(i) + 1; // add one because the method "Download" does a -1 on the index elsewhere in the program 
+					AudioContent content = store.getContent(index); 
+					this.download(content); 
+				}
+				catch (DownloadedAlready e)
+				{
+					System.out.println(e.getMessage());
+				}
+			}	
+		}
+		catch (Exception e)
+		{
+			System.out.println("No Matches for " + artist);
+		}
 	}
 
-	
+	public void downloadGenre(Song.Genre genre, AudioContentStore store)
+	{
+
+			ArrayList<Integer> indexes = store.getGenreIndexes(genre); 
+			for (int i = 0; i < indexes.size(); i++)
+			{
+				try
+				{
+					int index = indexes.get(i) + 1; // index + 1 because it the index is being subtracted by 1 elsewhere
+					AudioContent content = store.getContent(index); 
+					this.download(content); 
+				}
+				catch (DownloadedAlready e) 
+				{
+					System.out.println(e.getMessage()); 
+				}
+			}
+
+	}
 	// Print Information (printInfo()) about all songs in the array list
 	public void listAllSongs()
 	{
@@ -147,12 +191,11 @@ public class Library
 	// Delete a song from the library (i.e. the songs list) - 
 	// also go through all playlists and remove it from any playlist as well if it is part of the playlist
 
-	public boolean deleteSong(int index) // the argument is 1-indexed
+	public void deleteSong(int index) // the argument is 1-indexed
 	{
 		if (index < 1 || index > songs.size())
 		{
-			errorMsg = "Song Not Found";
-			return false; // if the index is not valid return false
+			throw new AudioContentNotFound("Song Not Found");
 		}  
 
 		String songTitle = songs.get(index - 1).getTitle(); 
@@ -176,10 +219,7 @@ public class Library
 
 			}
 		}
-
-		songs.remove(index - 1); // remove the song from the ArrayList songs 
-		return true; 
-		
+		songs.remove(index - 1); // remove the song from the ArrayList song
 	}
 
   //Sort songs in library by year
@@ -250,38 +290,36 @@ public class Library
 	 */
 	
 	// Play song from songs list
-	public boolean playSong(int index)
+	public void playSong(int index)
 	{
 		if (index < 1 || index > songs.size())
 		{
-			errorMsg = "Song Not Found";
-			return false;
+			throw new AudioContentNotFound("Song Not Found");
 		}
 		songs.get(index-1).play();
-		return true;
 	}
 	
 	// Play podcast from list (specify season and episode)
 	// Bonus
-	public boolean playPodcast(int index, int season, int episode)
+	public void playPodcast(int index, int season, int episode)
 	{	
 		if (index <  1 || index > podcasts.size()) // check if there is such a podcast
 		{
 			errorMsg = "Podcast Not Found";
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		// Validate the other inputted parameters as well 
 		if (! podcasts.get(index - 1).hasSeason(season)) // Check if this podcast HAS this season, i.e., if the index is valid for the arraylist of podcasts
 		{
 			errorMsg = "Season Not Found"; 
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		if (! podcasts.get(index - 1).seasons.get(season - 1).hasEpisode(episode)) // likewise, check if this season object HAS this episode, i.e., if episode index is valid for the arraylist of episodes
 		{
 			errorMsg = "Episode Not Found"; 
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 		 
 
@@ -289,31 +327,29 @@ public class Library
 		podcasts.get(index - 1).setEpisodeData(season, episode);
 		// Then play it
 		podcasts.get(index- 1).play();
-		return true; 
 	}
 	
 	// Print the episode titles of a specified season
 	// Bonus 
-	public boolean printPodcastEpisodes(int index, int season)
+	public void printPodcastEpisodes(int index, int season)
 	{
 		if (index <  1 || index > podcasts.size()) // check if there is such a podcast
 		{
 			errorMsg = "Podcast Not Found";
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		// Validate the other inputted parameters as well 
 		if (! podcasts.get(index - 1).hasSeason(season)) // Check if this podcast HAS this season, i.e., if the index is valid for the arraylist of podcasts
 		{
 			errorMsg = "Season Not Found"; 
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 		podcasts.get(index - 1).printTOC(season);
-		return true; 
 	}
 	
 	// Play a chapter of an audio book from list of audiobooks
-	public boolean playAudioBook(int index, int chapter)
+	public void playAudioBook(int index, int chapter)
 	{
 		// get audiobook from ArrayList
 		// get the ArrayList of chapters associated with that audiobook object 
@@ -321,52 +357,49 @@ public class Library
 		if (index < 1 || index > audiobooks.size()) // check if index is valid 
 		{
 			errorMsg = "Audiobook Not Found";
-			return false;
+			throw new AudioContentNotFound(errorMsg);
 		}
 		else if (chapter < 1 || index > audiobooks.get(index-1).getChapters().size()) // check if chapter index is valid 
 		{
 			errorMsg = "Chapter Not Found";
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		audiobooks.get(index-1).selectChapter(chapter); // select chapter 
 		audiobooks.get(index-1).play(); // play the chapter
-		return true;
 	}
 	
 	// Print the chapter titles (Table Of Contents) of an audiobook
 	// see class AudioBook
-	public boolean printAudioBookTOC(int index)
+	public void printAudioBookTOC(int index)
 	{
 		if (index < 1 || index > audiobooks.size())
 		{
 			errorMsg = "Audiobook Not Found";
-			return false;
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		audiobooks.get(index - 1).printTOC();
-		return true;
 	}
 	
 	// PRINT PDOCAST TOC 
-	public boolean printPodcastTOC(int podcast, int season) 
+	public void printPodcastTOC(int podcast, int season) 
 	{ 
 
 		// Validate the parameters and then print the TOC for that particular season in the podcast
 		if (podcast < 1 || podcast > podcasts.size()) 
 		{
 			errorMsg = "Podcast Not Found"; 
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		if (! podcasts.get(podcast- 1).hasSeason(season)) // 
 		{
 			errorMsg = "Season Not Found"; 
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
 
 		podcasts.get(podcast - 1).printTOC(season);
-		return true; 
 	}
   /*
    * Playlist Related Methods
@@ -374,20 +407,19 @@ public class Library
 	
 	// Make a new playlist and add to playlists array list
 	// Make sure a playlist with the same title doesn't already exist
-	public boolean makePlaylist(String title)
+	public void makePlaylist(String title)
 	{
 		Playlist newPlaylist = new Playlist(title); 
 		if (!playlists.contains(newPlaylist)) 
 		{
 			playlists.add(newPlaylist);
-			return true;  
 		}
 		errorMsg = "Playlist " + title + " Already Exists"; 
-		return false;
+		throw new AudioContentNotFound(errorMsg);
 	}
 	
 	// Print list of content information (songs, audiobooks etc) in playlist named title from list of playlists
-	public boolean printPlaylist(String title)
+	public void printPlaylist(String title)
 	{
 		for (int i = 0; i < playlists.size(); i++)
 		{
@@ -395,38 +427,39 @@ public class Library
 			{
 				playlists.get(i).printContents(); 
 				System.out.println();
-				return true; 
+				return;
 			}
 		}
-		return false;
+
+		throw new AudioContentNotFound("No such playlist");
 	}
 	
 	// Play all content in a playlist
-	public boolean playPlaylist(String playlistTitle)
+	public void playPlaylist(String playlistTitle)
 	{
 		for (int i = 0; i < playlists.size(); i++)
 		{
 			if (playlists.get(i).getTitle().equals(playlistTitle))
 			{
 				playlists.get(i).playAll(); 
-				return true; 
+				return;
 			}
 		}
-		return false;
+		throw new AudioContentNotFound("No such playlist");
 	}
 	
 	// Play a specific song/audiobook in a playlist
-	public boolean playPlaylist(String playlistTitle, int indexInPL)
+	public void playPlaylist(String playlistTitle, int indexInPL)
 	{
 		for (int i = 0; i < playlists.size(); i++)
 		{
 			if (playlists.get(i).getTitle().equals(playlistTitle))
 			{
 				playlists.get(i).play(indexInPL); 
-				return true; 
+				return; 
 			}
 		}
-		return false;
+		throw new AudioContentNotFound("No such playlist");
 	}
 	
 
@@ -447,21 +480,21 @@ public class Library
 	// Use the type parameter and compare to Song.TYPENAME etc
 	// to determine which array list it comes from then use the given index
 	// for that list
-	public boolean addContentToPlaylist(String type, int index, String playlistTitle)
+	public void addContentToPlaylist(String type, int index, String playlistTitle)
 	{
 		if (type.equalsIgnoreCase(Song.TYPENAME))
 		{
 			// by means of the method above, retrieve the playlist object 
 			// from the list and then add the Song object contained at the index given in the songs list 
 			this.getPlaylist(playlistTitle).addContent(songs.get(index - 1));
-			return true; 
+			return;
 		}
 		else if (type.equalsIgnoreCase(AudioBook.TYPENAME))
 		{
 			// by means of the method above, retrieve the playlist object 
 			// from the list and then add the Audiobook object contained at the index given in the audiobooks list 
 			this.getPlaylist(playlistTitle).addContent(audiobooks.get(index-1));
-			return true; 
+			return;
 		}
 		
 		else if (type.equalsIgnoreCase(Podcast.TYPENAME))
@@ -469,24 +502,40 @@ public class Library
 			// by means of the method above, retrieve the playlist object 
 			// from the list and then add the Podcast object contained at the index given in the podcasts list 
 			this.getPlaylist(playlistTitle).addContent(podcasts.get(index));
-			return true; 
+			return;
 		}
 		
-		return false;
+		throw new AudioContentNotFound("Could Not Find That Playlist");
 	}
 
   // Delete a song/audiobook/podcast from a playlist with the given title
 	// Make sure the given index of the song/audiobook/podcast in the playlist is valid 
-	public boolean delContentFromPlaylist(int index, String title)
+	public void delContentFromPlaylist(int index, String title)
 	{
 		if (! this.getPlaylist(title).contains(index)) 
 		{
 			errorMsg = "Index in playlist is not valid"; 
-			return false; 
+			throw new AudioContentNotFound(errorMsg);
 		}
-		this.getPlaylist(title).deleteContent(index);
-		return true; 
+		this.getPlaylist(title).deleteContent(index); 
 	}
 	
 }
 
+class AudioContentNotFound extends RuntimeException 
+{
+	public AudioContentNotFound() {} 
+	public AudioContentNotFound(String message)
+	{
+		super(message); 
+	}
+}
+
+class DownloadedAlready extends RuntimeException
+{
+	public DownloadedAlready() {}
+	public DownloadedAlready(String message)
+	{
+		super(message); 
+	}
+}
