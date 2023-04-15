@@ -236,6 +236,76 @@ public class AudioContentStore
 			}
 		}
 
+		public void searchPartial(String partial)
+		{
+			try 
+			{
+				for (int i = 0; i < contents.size(); i++)
+				{
+					if (contents.get(i).getType().equals(Song.TYPENAME))
+					{
+						Song song = (Song) contents.get(i); 
+						if (song.getTitle().contains(partial))
+						{
+							searchArtist(song.getArtist()); 
+							return; 
+						}
+						else if (song.getArtist().contains(partial))
+						{
+							searchArtist(song.getArtist());  
+							return;
+						}
+						else if(song.getComposer().contains(partial))
+						{
+							searchArtist(song.getArtist()); 
+							return; 
+						}
+						else if (song.getLyrics().contains(partial))
+						{
+							searchArtist(song.getArtist()); 
+							return;
+						}
+					}
+					else if (contents.get(i).getType().equals(AudioBook.TYPENAME))
+					{
+						AudioBook audiobook = (AudioBook) contents.get(i); 
+						if (audiobook.getTitle().contains(partial))
+						{
+							searchArtist(audiobook.getAuthor()); 
+							return; 
+						}
+						else if (audiobook.getAuthor().contains(partial))
+						{
+							searchArtist(audiobook.getAuthor());  
+							return;
+						}
+						else if(audiobook.getChapterTitles().contains(partial))
+						{
+							searchArtist(audiobook.getAuthor()); 
+							return; 
+						}
+						else
+						{
+							for (int j = 0; j < audiobook.getChapterTitles().size(); j++)
+							{
+								String chapterContent = audiobook.getChapters().get(j);
+								if (chapterContent.contains(partial)) 
+								{
+									searchArtist(audiobook.getAuthor()); 
+									return;
+								}
+								
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e) 
+			{
+				System.out.println("No matches for " + partial);
+			}
+		}
+
 		public void searchGenre(Song.Genre genre) 
 		{	
 			// Given an artist, prints all songs of that artist

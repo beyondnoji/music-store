@@ -99,6 +99,19 @@ public class MyAudioUI
 						store.searchGenre(Song.Genre.CLASSICAL);
 					}
 				}
+
+				else if(action.equalsIgnoreCase("SEARCHP"))
+				{
+					String partial = ""; 
+
+					System.out.print("Enter target string: ");
+					if (scanner.hasNext())
+					{
+						partial = scanner.next();
+						scanner.nextLine();
+					}
+					store.searchPartial(partial);
+				}
 				
 				else if (action.equalsIgnoreCase("STORE"))	// List all songs
 				{
