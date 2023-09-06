@@ -4,5 +4,5 @@ On the technical side of things, it is coded in Java and is an Object-oriented p
 On top of this, I integrated a variety of data-structures, such as arrays, ArrayLists, HashMaps, Stacks, etc. 
 In order to code the functionalities available to the user, a variety of methods, each of which utilize some means of searching and retrieving an object from these data-structures, were used. 
 
-All in all, coding this application was a great exercise and boost to my programming skills, specifically as it pertains to designing an application and code which all logically and coherently hang together. 
+# All in all, coding this application was a great exercise and boost to my programming skills, specifically as it pertains to designing an application and code which all logically and coherently hang together. 
 
